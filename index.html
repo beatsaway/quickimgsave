@@ -50,6 +50,12 @@
       text-align: center;
       line-height: 22px;
     }
+    .filename {
+      font-size: 12px;
+      margin-top: 5px;
+      word-break: break-all;
+      max-width: 200px;
+    }
     .controls {
       margin-top: 15px;
     }
@@ -72,6 +78,18 @@
       font-size: 16px;
       cursor: pointer;
     }
+    .checkbox-container {
+      margin: 15px 0;
+    }
+    .filename-input {
+      margin-left: 5px;
+    }
+    .custom-filename-input {
+      width: 190px;
+      margin-top: 5px;
+      padding: 4px;
+      font-size: 12px;
+    }
   </style>
 </head>
 <body>
@@ -87,8 +105,11 @@
 
   <!-- Controls: ZIP filename, format, and button -->
   <div class="controls">
-    <label for="zipName">filename:</label>
-    <input type="text" id="zipName" value="pasted_images" />
+    <div class="checkbox-container">
+      <input type="checkbox" id="useMasterName" checked>
+      <label for="useMasterName">Use master filename for all images</label>
+      <input type="text" id="zipName" value="pasted_images" class="filename-input">
+    </div>
 
     <label for="formatSelect">Export format:</label>
     <select id="formatSelect">
@@ -100,7 +121,7 @@
   </div>
 
   <script>
-    // We'll store each image as an object: { id, dataURL }
+    // We'll store each image as an object: { id, dataURL, filename, customFilename }
     let imagesArray = [];
 
     // Listen for paste events anywhere on the page
@@ -119,15 +140,22 @@
               // Create an ID (timestamp-based or random)
               const uniqueId = Date.now() + '-' + Math.floor(Math.random() * 100000);
 
-              // Store the data URL in our array
+              // Store the data URL and filename in our array
               const dataURL = e.target.result;
+              let filename = blob.name || `image-${uniqueId}`;
+              
+              // Remove extension if present (we'll add our own later)
+              filename = filename.replace(/\.[^/.]+$/, "");
+              
               imagesArray.push({
                 id: uniqueId,
-                dataURL: dataURL
+                dataURL: dataURL,
+                filename: filename,
+                customFilename: filename // Initialize customFilename with the original filename
               });
 
               // Render it in the DOM
-              addImageToDOM(uniqueId, dataURL);
+              addImageToDOM(uniqueId, dataURL, filename);
             };
             reader.readAsDataURL(blob);
           }
@@ -135,8 +163,8 @@
       }
     });
 
-    // Helper: Add an image to the page with a remove button
-    function addImageToDOM(id, dataURL) {
+    // Helper: Add an image to the page with a remove button and filename
+    function addImageToDOM(id, dataURL, filename) {
       const container = document.getElementById('imagesContainer');
       
       // Wrapper div
@@ -148,6 +176,20 @@
       const img = document.createElement('img');
       img.src = dataURL;
 
+      // Filename input
+      const filenameInput = document.createElement('input');
+      filenameInput.type = 'text';
+      filenameInput.className = 'custom-filename-input';
+      filenameInput.value = filename;
+      filenameInput.placeholder = 'Enter filename';
+      filenameInput.addEventListener('change', (e) => {
+        // Update the customFilename in our array when user changes it
+        const imageObj = imagesArray.find(img => img.id === id);
+        if (imageObj) {
+          imageObj.customFilename = e.target.value.trim() || imageObj.filename;
+        }
+      });
+
       // Remove button
       const removeBtn = document.createElement('button');
       removeBtn.textContent = '×';
@@ -158,6 +200,7 @@
 
       wrapper.appendChild(img);
       wrapper.appendChild(removeBtn);
+      wrapper.appendChild(filenameInput);
       container.appendChild(wrapper);
     }
 
@@ -200,6 +243,7 @@
     const saveZipBtn = document.getElementById('saveZipBtn');
     const formatSelect = document.getElementById('formatSelect');
     const zipNameInput = document.getElementById('zipName');
+    const useMasterNameCheckbox = document.getElementById('useMasterName');
 
     saveZipBtn.addEventListener('click', async () => {
       if (imagesArray.length === 0) {
@@ -208,7 +252,8 @@
       }
 
       const chosenFormat = formatSelect.value; // "jpg" or "png"
-      const zipFileName = zipNameInput.value.trim() || 'pasted_images';
+      const useMasterName = useMasterNameCheckbox.checked;
+      const masterFilename = zipNameInput.value.trim() || 'pasted_images';
 
       // Convert all images to chosen format
       const convertedDataURLs = await Promise.all(
@@ -222,13 +267,24 @@
       convertedDataURLs.forEach((dataURL, index) => {
         const base64Data = dataURL.split(',')[1];
         const extension = (chosenFormat === 'png') ? 'png' : 'jpg';
+        
+        let filename;
+        if (useMasterName) {
+          filename = `${masterFilename}${index + 1}.${extension}`;
+        } else {
+          // Use custom filename with new extension
+          filename = `${imagesArray[index].customFilename}.${extension}`;
+        }
 
-        zip.file(`${zipFileName}${index}.${extension}`, base64Data, { base64: true });
+        zip.file(filename, base64Data, { base64: true });
       });
 
       // Generate the ZIP and prompt download
       zip.generateAsync({ type: 'blob' }).then((content) => {
-        saveAs(content, `${zipFileName}.${chosenFormat}_images.zip`);
+        const zipFilename = useMasterName 
+          ? `${masterFilename}.zip` 
+          : `images_${new Date().toISOString().slice(0, 10)}.zip`;
+        saveAs(content, zipFilename);
       });
     });
   </script>
