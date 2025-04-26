@@ -1,292 +1,316 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Paste Images and Zip</title>
-  <!-- Include JSZip script (CDN link) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <!-- Include FileSaver (CDN link) to save the zip file -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick IMG Save - Home</title>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
     body {
-      font-family: sans-serif;
-      margin: 20px;
-    }
-    h1 {
-      margin-bottom: 5px;
-    }
-    p {
-      margin-top: 0;
-    }
-    #imagesContainer {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f0f2f5;
+      height: 100vh;
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .imageWrapper {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #212529;
+      line-height: 1.5;
+      overflow: hidden;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       position: relative;
+    }
+    
+    .container {
+      text-align: center;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 3rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      max-width: 800px;
+      width: 90%;
+      z-index: 10;
+      position: relative;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+      color: #2c3e50;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    p {
+      font-size: 1.2rem;
+      color: #495057;
+      margin-bottom: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .btn {
       display: inline-block;
-    }
-    .imageWrapper img {
-      max-width: 200px;
-      height: auto;
-      border: 1px solid #ccc;
-      padding: 5px;
-    }
-    .removeBtn {
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      background-color: rgba(255, 0, 0, 0.7);
-      color: #fff;
+      background-color: #0d6efd;
+      color: white;
+      padding: 1rem 2.5rem;
+      border-radius: 2rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
       border: none;
       cursor: pointer;
-      font-weight: bold;
+      box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn:hover {
+      background-color: #0b5ed7;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+    }
+    
+    .features {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+    }
+    
+    .feature {
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      width: 200px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .feature:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .feature h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: #2c3e50;
+    }
+    
+    .feature p {
+      font-size: 0.9rem;
+      margin-bottom: 0;
+      color: #6c757d;
+    }
+    
+    .icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: #0d6efd;
+    }
+    
+    .footer {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.8);
+      position: absolute;
+      bottom: 1rem;
+    }
+    
+    .footer a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    .footer a:hover {
+      text-decoration: underline;
+    }
+    
+    /* Floating shapes */
+    .shapes {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    
+    .shape {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
       border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      text-align: center;
-      line-height: 22px;
+      animation: float 15s infinite linear;
     }
-    .filename {
-      font-size: 12px;
-      margin-top: 5px;
-      word-break: break-all;
-      max-width: 200px;
+    
+    .shape:nth-child(1) {
+      width: 200px;
+      height: 200px;
+      top: 10%;
+      left: 5%;
+      animation-duration: 25s;
     }
-    .controls {
-      margin-top: 15px;
+    
+    .shape:nth-child(2) {
+      width: 150px;
+      height: 150px;
+      top: 20%;
+      right: 10%;
+      animation-duration: 30s;
+      animation-delay: 5s;
     }
-    .controls label {
-      display: inline-block;
-      margin-right: 6px;
+    
+    .shape:nth-child(3) {
+      width: 180px;
+      height: 180px;
+      bottom: 15%;
+      right: 15%;
+      animation-duration: 22s;
+      animation-delay: 2s;
     }
-    .controls input {
-      padding: 6px;
-      font-size: 14px;
-      margin-right: 10px;
+    
+    .shape:nth-child(4) {
+      width: 100px;
+      height: 100px;
+      bottom: 10%;
+      left: 15%;
+      animation-duration: 18s;
+      animation-delay: 7s;
     }
-    .controls select {
-      margin-right: 10px;
-      padding: 6px;
-      font-size: 14px;
+    
+    @keyframes float {
+      0% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+      25% {
+        transform: translate(50px, 50px) rotate(90deg);
+      }
+      50% {
+        transform: translate(0, 100px) rotate(180deg);
+      }
+      75% {
+        transform: translate(-50px, 50px) rotate(270deg);
+      }
+      100% {
+        transform: translate(0, 0) rotate(360deg);
+      }
     }
-    #saveZipBtn {
-      padding: 10px 15px;
-      font-size: 16px;
-      cursor: pointer;
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      p {
+        font-size: 1rem;
+      }
+      
+      .features {
+        gap: 1rem;
+      }
+      
+      .feature {
+        width: 160px;
+        padding: 1rem;
+      }
     }
-    .checkbox-container {
-      margin: 15px 0;
-    }
-    .filename-input {
-      margin-left: 5px;
-    }
-    .custom-filename-input {
-      width: 190px;
-      margin-top: 5px;
-      padding: 4px;
-      font-size: 12px;
+    
+    @media (max-width: 480px) {
+      .container {
+        padding: 2rem 1rem;
+      }
+      
+      .features {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .feature {
+        width: 100%;
+        max-width: 280px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Paste Images and Zip</h1>
-  <p>
-    Press <strong>Ctrl+V</strong> (or Cmd+V on Mac) on this page to paste images 
-    from your clipboard. You can then remove unwanted images or rename all images
-    before downloading.
-  </p>
-
-  <!-- Container for pasted images -->
-  <div id="imagesContainer"></div>
-
-  <!-- Controls: ZIP filename, format, and button -->
-  <div class="controls">
-    <div class="checkbox-container">
-      <input type="checkbox" id="useMasterName" checked>
-      <label for="useMasterName">Use master filename for all images</label>
-      <input type="text" id="zipName" value="pasted_images" class="filename-input">
-    </div>
-
-    <label for="formatSelect">Export format:</label>
-    <select id="formatSelect">
-      <option value="jpg" selected>JPG</option>
-      <option value="png">PNG</option>
-    </select>
-
-    <button id="saveZipBtn">Save All Images as ZIP</button>
+  <div class="shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
   </div>
-
+  
+  <div class="container">
+    <h1>Quick IMG Save</h1>
+    <p>A fast and easy way to process clipboard images. Rotate, enhance, and download them individually or as a zip file.</p>
+    
+    <div class="features">
+      <div class="feature">
+        <div class="icon">📋</div>
+        <h3>Easy Paste</h3>
+        <p>Just press Ctrl+V to paste images from your clipboard.</p>
+      </div>
+      
+      <div class="feature">
+        <div class="icon">🔄</div>
+        <h3>Rotate Images</h3>
+        <p>Quickly rotate images individually or all at once.</p>
+      </div>
+      
+      <div class="feature">
+        <div class="icon">✨</div>
+        <h3>Enhance</h3>
+        <p>Improve contrast and brightness with one click.</p>
+      </div>
+    </div>
+    
+    <a href="quickimgsave_v1_02/index.html" class="btn">Get Started</a>
+  </div>
+  
+  <div class="footer">
+    <p>Created by 🐢 <a href="https://www.youtube.com/@tortorkeneducation">Tortorken Education</a> ©2025</p>
+  </div>
+  
   <script>
-    // We'll store each image as an object: { id, dataURL, filename, customFilename }
-    let imagesArray = [];
-
-    // Listen for paste events anywhere on the page
-    document.addEventListener('paste', (event) => {
-      const clipboardItems = event.clipboardData?.items;
-      if (!clipboardItems) return;
-      
-      for (let i = 0; i < clipboardItems.length; i++) {
-        const item = clipboardItems[i];
-        // If the item is an image
-        if (item.type.indexOf('image') !== -1) {
-          const blob = item.getAsFile();
-          if (blob) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              // Create an ID (timestamp-based or random)
-              const uniqueId = Date.now() + '-' + Math.floor(Math.random() * 100000);
-
-              // Store the data URL and filename in our array
-              const dataURL = e.target.result;
-              let filename = blob.name || `image-${uniqueId}`;
-              
-              // Remove extension if present (we'll add our own later)
-              filename = filename.replace(/\.[^/.]+$/, "");
-              
-              imagesArray.push({
-                id: uniqueId,
-                dataURL: dataURL,
-                filename: filename,
-                customFilename: filename // Initialize customFilename with the original filename
-              });
-
-              // Render it in the DOM
-              addImageToDOM(uniqueId, dataURL, filename);
-            };
-            reader.readAsDataURL(blob);
-          }
-        }
-      }
+    // Add a small animation to the button
+    const btn = document.querySelector('.btn');
+    btn.addEventListener('mouseover', () => {
+      btn.style.transform = 'translateY(-3px)';
     });
-
-    // Helper: Add an image to the page with a remove button and filename
-    function addImageToDOM(id, dataURL, filename) {
-      const container = document.getElementById('imagesContainer');
+    
+    btn.addEventListener('mouseout', () => {
+      btn.style.transform = 'translateY(0)';
+    });
+    
+    // Make the shapes move randomly on mouse movement
+    document.addEventListener('mousemove', (e) => {
+      const shapes = document.querySelectorAll('.shape');
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
       
-      // Wrapper div
-      const wrapper = document.createElement('div');
-      wrapper.className = 'imageWrapper';
-      wrapper.dataset.id = id; // store the ID in the dataset
-
-      // The image
-      const img = document.createElement('img');
-      img.src = dataURL;
-
-      // Filename input
-      const filenameInput = document.createElement('input');
-      filenameInput.type = 'text';
-      filenameInput.className = 'custom-filename-input';
-      filenameInput.value = filename;
-      filenameInput.placeholder = 'Enter filename';
-      filenameInput.addEventListener('change', (e) => {
-        // Update the customFilename in our array when user changes it
-        const imageObj = imagesArray.find(img => img.id === id);
-        if (imageObj) {
-          imageObj.customFilename = e.target.value.trim() || imageObj.filename;
-        }
-      });
-
-      // Remove button
-      const removeBtn = document.createElement('button');
-      removeBtn.textContent = '×';
-      removeBtn.className = 'removeBtn';
-      removeBtn.addEventListener('click', () => {
-        removeImageById(id);
-      });
-
-      wrapper.appendChild(img);
-      wrapper.appendChild(removeBtn);
-      wrapper.appendChild(filenameInput);
-      container.appendChild(wrapper);
-    }
-
-    // Helper: Remove an image by its ID from both DOM and our array
-    function removeImageById(id) {
-      // Remove from the array
-      imagesArray = imagesArray.filter((imgObj) => imgObj.id !== id);
-
-      // Remove from DOM
-      const wrapper = document.querySelector(`.imageWrapper[data-id='${id}']`);
-      if (wrapper) {
-        wrapper.remove();
-      }
-    }
-
-    // Helper: Convert any dataURL to a chosen format (jpg/png)
-    function convertDataURL(originalDataURL, format = 'jpg', quality = 0.9) {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.crossOrigin = 'Anonymous'; // In case needed
-        img.onload = () => {
-          // Create an off-screen canvas
-          const canvas = document.createElement('canvas');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext('2d');
-          // Draw the image
-          ctx.drawImage(img, 0, 0);
-
-          // Use "image/png" or "image/jpeg"
-          let mimeType = (format === 'png') ? 'image/png' : 'image/jpeg';
-          const convertedDataURL = canvas.toDataURL(mimeType, quality);
-          resolve(convertedDataURL);
-        };
-        img.src = originalDataURL;
-      });
-    }
-
-    // On click: convert images (if needed), ZIP, and download
-    const saveZipBtn = document.getElementById('saveZipBtn');
-    const formatSelect = document.getElementById('formatSelect');
-    const zipNameInput = document.getElementById('zipName');
-    const useMasterNameCheckbox = document.getElementById('useMasterName');
-
-    saveZipBtn.addEventListener('click', async () => {
-      if (imagesArray.length === 0) {
-        alert('No images to save!');
-        return;
-      }
-
-      const chosenFormat = formatSelect.value; // "jpg" or "png"
-      const useMasterName = useMasterNameCheckbox.checked;
-      const masterFilename = zipNameInput.value.trim() || 'pasted_images';
-
-      // Convert all images to chosen format
-      const convertedDataURLs = await Promise.all(
-        imagesArray.map((imgObj) => convertDataURL(imgObj.dataURL, chosenFormat))
-      );
-
-      // Create a new JSZip instance
-      const zip = new JSZip();
-
-      // Add each converted image to the ZIP
-      convertedDataURLs.forEach((dataURL, index) => {
-        const base64Data = dataURL.split(',')[1];
-        const extension = (chosenFormat === 'png') ? 'png' : 'jpg';
+      shapes.forEach((shape, index) => {
+        const factor = (index + 1) * 10;
+        const offsetX = (x - 0.5) * factor;
+        const offsetY = (y - 0.5) * factor;
         
-        let filename;
-        if (useMasterName) {
-          filename = `${masterFilename}${index + 1}.${extension}`;
-        } else {
-          // Use custom filename with new extension
-          filename = `${imagesArray[index].customFilename}.${extension}`;
-        }
-
-        zip.file(filename, base64Data, { base64: true });
-      });
-
-      // Generate the ZIP and prompt download
-      zip.generateAsync({ type: 'blob' }).then((content) => {
-        const zipFilename = useMasterName 
-          ? `${masterFilename}.zip` 
-          : `images_${new Date().toISOString().slice(0, 10)}.zip`;
-        saveAs(content, zipFilename);
+        shape.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
       });
     });
   </script>
 </body>
-</html>
