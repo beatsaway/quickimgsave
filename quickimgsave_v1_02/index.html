@@ -242,11 +242,14 @@
     .drop-zone {
       border: 2px dashed #dee2e6;
       border-radius: 8px;
-      padding: 40px;
+      padding: 12px;
       text-align: center;
       background-color: #f8f9fa;
       margin: 20px 0;
       transition: all 0.3s ease;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .drop-zone.dragover {
       border-color: #0d6efd;
@@ -255,11 +258,23 @@
     .drop-zone p {
       margin: 0;
       color: #6c757d;
+      font-size: 13px;
+      line-height: 1.4;
+      display: inline-block;
+      vertical-align: middle;
     }
     .drop-zone .drop-icon {
-      font-size: 48px;
+      font-size: 24px;
       color: #6c757d;
-      margin-bottom: 10px;
+      margin-right: 8px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .drop-zone .instructions {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #6c757d;
+      line-height: 1.4;
     }
   </style>
 </head>
@@ -295,16 +310,12 @@
     </div>
   </div>
 
-  <p>
-    Press <strong>Ctrl+V</strong> (or Cmd+V on Mac) on this page to paste images 
-    from your clipboard. You can then remove unwanted images, rename them, rotate them,
-    or enhance their contrast before downloading.
-  </p>
-
   <div class="drop-zone" id="dropZone">
     <div class="drop-icon">📁</div>
-    <p>Drag & drop images here</p>
-    <p style="font-size: 12px; margin-top: 5px;">or paste (Ctrl+V)</p>
+    <p>Drag & drop images here or paste (Ctrl+V)</p>
+    <div class="instructions">
+      You can remove unwanted images, rename them, rotate them, or enhance their contrast before downloading.
+    </div>
   </div>
 
   <!-- Container for pasted images -->
